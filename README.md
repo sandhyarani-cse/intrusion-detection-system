@@ -61,7 +61,7 @@ This IDS learns from historical network traffic patterns and classifies traffic 
 ## 📁 Project Structure
 
 ```
-IDS_Project/
+intrusion-detection-system/
 │
 ├── app.py                    ← Main Flask application (all routes + ML logic)
 ├── requirements.txt          ← Python dependencies
