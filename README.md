@@ -161,56 +161,6 @@ http://127.0.0.1:5000
 
 ---
 
-## 📤 GitHub — Push Updated Code
-
-```bash
-# Inside the project folder
-git init
-git add .
-git commit -m "feat: professional IDS rewrite — fixed ML pipeline, UI, routing"
-
-# Replace remote with your repo
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
-
-# Force push (replaces old code)
-git push -u origin main --force
-```
-
-> **Windows tip:** Use **Git Bash** or **Windows Terminal** for these commands.
-
----
-
-## 🌐 Free Deployment
-
-### Option A — Render (recommended for Flask)
-
-1. Push code to GitHub (steps above).
-2. Go to [render.com](https://render.com) → New → Web Service.
-3. Connect your GitHub repo.
-4. Set:
-   - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `gunicorn app:app`
-5. Add `gunicorn` to `requirements.txt`.
-6. Click **Deploy** — your app gets a free `https://your-app.onrender.com` URL.
-
-### Option B — Railway
-
-1. Go to [railway.app](https://railway.app) → New Project → Deploy from GitHub.
-2. Set start command: `python app.py`
-3. Set environment variable: `FLASK_ENV=production`
-4. Deploy.
-
-### Option C — PythonAnywhere (simplest)
-
-1. Sign up at [pythonanywhere.com](https://www.pythonanywhere.com) (free tier).
-2. Upload project via Files tab.
-3. Create a Web App → Flask → Python 3.10.
-4. Set source code path and WSGI file.
-
-> **Note:** Free tiers may sleep after inactivity. Render and Railway are best for demos.
-
----
-
 ## 📄 Publication
 
 > Mulge M., Neha, Namratha, Prerana, **Sandhya Rani** —
