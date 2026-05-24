@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}IDS — Compare All Algorithms{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1><i class="fa fa-th-list" style="color:var(--blue);margin-right:8px;"></i>Compare All Algorithms</h1>
+  <p>Step 5 of 5 — All 5 ML algorithms trained and evaluated on your dataset simultaneously</p>
+</div>
+
+{% if error %}
+<div class="alert alert-error">
+  <i class="fa fa-exclamation-circle"></i>
+  <div>
+    {{ error }}
+    &nbsp;<a href="/upload"><strong>Upload a dataset →</strong></a>
+    &nbsp;then&nbsp;
+    <a href="/traintest"><strong>Split it →</strong></a>
+  </div>
+</div>
+{% endif %}
+
+{% if rows %}
+<div class="alert alert-success">
+  <i class="fa fa-check-circle"></i>
+  All 5 algorithms trained and evaluated on your dataset. Green cells indicate the best value in each column.
+</div>
+
+<!-- Full metrics table -->
+<div class="card">
+  <div class="card-header"><i class="fa fa-table"></i> Full Metrics Comparison</div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Algorithm</th>
+          <th>Accuracy ↑</th>
+          <th>Precision ↑</th>
+          <th>Recall ↑</th>
+          <th>F1-Score ↑</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr {% if loop.first %}class="winner-row"{% endif %}>
+          <td style="color:var(--gray-400);font-weight:600;">
+            {% if loop.first %}⭐{% else %}{{ loop.index }}{% endif %}
+          </td>
+          <td><strong>{{ r.name }}</strong></td>
+          <td class="{% if r.acc  == best.acc  %}best{% endif %}">{{ r.acc  }}%</td>
+          <td class="{% if r.prec == best.prec %}best{% endif %}">{{ r.prec }}%</td>
+          <td class="{% if r.rec  == best.rec  %}best{% endif %}">{{ r.rec  }}%</td>
+          <td class="{% if r.f1   == best.f1   %}best{% endif %}">{{ r.f1   }}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr style="background:var(--gray-50);border-top:2px solid var(--gray-200);">
+          <td colspan="2" style="font-size:11px;font-weight:700;color:var(--gray-500);padding:10px 14px;text-transform:uppercase;letter-spacing:.5px;">Best Value</td>
+          <td class="best">{{ best.acc  }}%</td>
+          <td class="best">{{ best.prec }}%</td>
+          <td class="best">{{ best.rec  }}%</td>
+          <td class="best">{{ best.f1   }}%</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  <p class="form-hint" style="margin-top:10px;">
+    <i class="fa fa-lightbulb-o" style="color:var(--orange);"></i>
+    <strong>Recall</strong> is the most important metric for an Intrusion Detection System —
+    missing a real attack (False Negative) is far worse than a false alarm (False Positive).
+  </p>
+</div>
+
+<!-- Multi-metric bar chart -->
+{% if bar_img %}
+<div class="card">
+  <div class="card-header"><i class="fa fa-bar-chart"></i> Metrics Comparison Chart</div>
+  <div class="chart-box">
+    <img src="data:image/png;base64,{{ bar_img }}" style="width:100%;" alt="Metrics Chart">
+  </div>
+</div>
+{% endif %}
+
+<!-- 5 Confusion Matrices -->
+<div class="card">
+  <div class="card-header"><i class="fa fa-th"></i> Confusion Matrices — All 5 Algorithms</div>
+  <p style="font-size:13px;color:var(--gray-500);margin-bottom:16px;">
+    Each matrix shows: <strong>TP</strong> (correct attacks), <strong>TN</strong> (correct normal),
+    <strong>FP</strong> (false alarms), <strong>FN</strong> (missed attacks).
+    A good IDS minimises FN.
+  </p>
+  <div class="row">
+    {% for r in rows %}
+    <div class="col-md-4 col-sm-6" style="margin-bottom:20px;">
+      <div style="border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:16px;text-align:center;{% if loop.first %}border-color:var(--green);background:var(--green-light);{% endif %}">
+        <div style="font-size:13px;font-weight:700;color:{% if loop.first %}var(--green){% else %}var(--gray-800){% endif %};margin-bottom:10px;">
+          {% if loop.first %}⭐ {% endif %}{{ r.name }}
+        </div>
+        <img src="data:image/png;base64,{{ cm_imgs[r.name] }}"
+             style="width:100%;max-width:260px;" alt="Confusion Matrix — {{ r.name }}">
+        <div style="display:flex;justify-content:center;gap:8px;margin-top:10px;">
+          <span class="badge badge-green">{{ r.acc }}% acc</span>
+          <span class="badge badge-blue">{{ r.f1 }}% F1</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="next-banner">
+  <div class="next-banner-text">
+    <p><i class="fa fa-arrow-right"></i> Analysis complete — make a prediction on a specific record</p>
+    <p class="sub">Click any row in the prediction table to classify it instantly</p>
+  </div>
+  <a href="/prediction" class="btn btn-primary"><i class="fa fa-crosshairs"></i> Go to Prediction</a>
+</div>
+{% endif %}
+
+{% endblock %}

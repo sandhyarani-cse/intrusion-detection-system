@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}IDS System{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/static/css/ids.css">
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══════════════════════════════════════ -->
+<nav class="navbar-ids">
+  <div class="navbar-inner">
+    <a href="/" class="navbar-brand">
+      <div class="brand-icon"><i class="fa fa-shield"></i></div>
+      IDS<span class="brand-sub">Sys</span>
+    </a>
+
+    <button class="navbar-toggle-btn" onclick="toggleNav()" aria-label="Menu">
+      <i class="fa fa-bars"></i>
+    </button>
+
+    <ul class="navbar-links" id="navLinks">
+      <li {% if request.path=='/' %}class="active"{% endif %}>
+        <a href="/"><i class="fa fa-home"></i> Home</a>
+      </li>
+
+      <!-- Data dropdown -->
+      <li class="nav-dropdown {% if request.path in ['/upload','/view','/traintest'] %}active{% endif %}">
+        <a href="#" onclick="return false;">
+          <i class="fa fa-database"></i> Data <i class="fa fa-caret-down" style="font-size:11px;margin-left:2px;"></i>
+        </a>
+        <div class="nav-dropdown-menu">
+          <a href="/upload"><i class="fa fa-upload"></i> Upload Dataset</a>
+          <a href="/view"><i class="fa fa-table"></i> View Dataset</a>
+          <div class="divider"></div>
+          <a href="/traintest"><i class="fa fa-random"></i> Train / Test Split</a>
+        </div>
+      </li>
+
+      <!-- Analysis dropdown -->
+      <li class="nav-dropdown {% if request.path in ['/modelperformance','/compare','/graph'] %}active{% endif %}">
+        <a href="#" onclick="return false;">
+          <i class="fa fa-bar-chart"></i> Analysis <i class="fa fa-caret-down" style="font-size:11px;margin-left:2px;"></i>
+        </a>
+        <div class="nav-dropdown-menu">
+          <a href="/modelperformance"><i class="fa fa-cogs"></i> Model Performance</a>
+          <a href="/compare"><i class="fa fa-th-list"></i> Compare All Algorithms</a>
+          <div class="divider"></div>
+          <a href="/graph"><i class="fa fa-line-chart"></i> Accuracy Graph</a>
+        </div>
+      </li>
+
+      <li {% if request.path=='/prediction' %}class="active"{% endif %}>
+        <a href="/prediction"><i class="fa fa-crosshairs"></i> Predict</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ═══ STEP PROGRESS BAR ════════════════════════════ -->
+{% set steps = [
+  ('/upload',          '1', 'Upload'),
+  ('/view',            '2', 'View'),
+  ('/traintest',       '3', 'Split'),
+  ('/modelperformance','4', 'Train'),
+  ('/compare',         '5', 'Compare'),
+  ('/prediction',      '6', 'Predict'),
+] %}
+{% set workflow_paths = ['/upload','/view','/traintest','/modelperformance','/compare','/prediction'] %}
+{% if request.path in workflow_paths %}
+{% set current_idx = workflow_paths.index(request.path) %}
+<div class="steps-bar">
+  <div class="steps-inner">
+    {% for path, num, label in steps %}
+    {% set idx = loop.index0 %}
+    {% set cls = 'active' if request.path == path else ('done' if current_idx > idx else '') %}
+    <a href="{{ path }}" class="step-item {{ cls }}" style="text-decoration:none;">
+      <div class="step-num">
+        {% if cls == 'done' %}<i class="fa fa-check" style="font-size:9px;"></i>
+        {% else %}{{ num }}{% endif %}
+      </div>
+      <span class="step-label">{{ label }}</span>
+    </a>
+    {% if not loop.last %}
+      <span class="step-arrow"><i class="fa fa-angle-right"></i></span>
+    {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- ═══ PAGE CONTENT ══════════════════════════════════ -->
+<div class="page-wrap">
+  {% block content %}{% endblock %}
+</div>
+
+<!-- ═══ FOOTER ═══════════════════════════════════════ -->
+<footer class="footer">
+  <div class="page-wrap" style="padding-top:0;padding-bottom:0;">
+    <p>
+      Cloud-Based Intrusion Detection System &nbsp;·&nbsp;
+      NSL-KDD Dataset &nbsp;·&nbsp;
+      Published in IJSREM, May 2024 &nbsp;·&nbsp;
+      <strong>Sandhya Rani</strong> — VTU Belagavi
+    </p>
+  </div>
+</footer>
+
+<script src="/static/js/jquery.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script>
+function toggleNav() {
+  document.getElementById('navLinks').classList.toggle('open');
+}
+// Close nav on outside click
+document.addEventListener('click', function(e) {
+  var nav = document.getElementById('navLinks');
+  var btn = document.querySelector('.navbar-toggle-btn');
+  if (nav && btn && !nav.contains(e.target) && !btn.contains(e.target)) {
+    nav.classList.remove('open');
+  }
+});
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

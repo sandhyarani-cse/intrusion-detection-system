@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}IDS — Model Performance{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1><i class="fa fa-cogs" style="color:var(--blue);margin-right:8px;"></i>Model Performance</h1>
+  <p>Step 4 of 5 — Train a single algorithm and evaluate its performance on the test set</p>
+</div>
+
+{% if error %}
+<div class="alert alert-error">
+  <i class="fa fa-exclamation-circle"></i>
+  <div>
+    {{ error }}
+    {% if 'split' in error.lower() %}
+    &nbsp;<a href="/traintest"><strong>Split your dataset first →</strong></a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+{% if success %}
+<div class="alert alert-success"><i class="fa fa-check-circle"></i> <strong>{{ alg_name }}</strong> trained and evaluated successfully</div>
+
+<div class="metrics-row">
+  <div class="metric-card">
+    <span class="metric-val">{{ acc }}%</span>
+    <div class="metric-label">Accuracy</div>
+  </div>
+  <div class="metric-card green">
+    <span class="metric-val" style="color:var(--green);">{{ prec }}%</span>
+    <div class="metric-label">Precision</div>
+  </div>
+  <div class="metric-card orange">
+    <span class="metric-val" style="color:var(--orange);">{{ rec }}%</span>
+    <div class="metric-label">Recall</div>
+  </div>
+  <div class="metric-card red">
+    <span class="metric-val" style="color:var(--red);">{{ f1 }}%</span>
+    <div class="metric-label">F1-Score</div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header"><i class="fa fa-th"></i> Confusion Matrix</div>
+      <div class="chart-box">
+        <img src="data:image/png;base64,{{ cm_img }}" style="max-width:100%;" alt="Confusion Matrix">
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header"><i class="fa fa-book"></i> What Do These Metrics Mean?</div>
+      <div style="font-size:13px;">
+        {% for metric, color, desc, importance in [
+          ('Accuracy',  'var(--blue)',   'Overall percentage of correct predictions — (TP + TN) / total records.', ''),
+          ('Precision', 'var(--green)',  'Of all traffic predicted as Attack, how many were actually attacks — TP / (TP + FP).', ''),
+          ('Recall',    'var(--orange)', 'Of all actual attacks, how many did the model catch — TP / (TP + FN).', 'Most important for IDS'),
+          ('F1-Score',  'var(--red)',    'Harmonic mean of Precision and Recall. Best measure for imbalanced datasets.', '')
+        ] %}
+        <div style="padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius);margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <strong style="color:{{ color }};">{{ metric }}</strong>
+            {% if importance %}<span class="badge badge-orange">{{ importance }}</span>{% endif %}
+          </div>
+          <p style="color:var(--gray-500);margin:0;line-height:1.5;">{{ desc }}</p>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="btn-group" style="margin-top:12px;">
+        <a href="/compare" class="btn btn-primary btn-sm"><i class="fa fa-th-list"></i> Compare All Algorithms</a>
+        <a href="/prediction" class="btn btn-secondary btn-sm"><i class="fa fa-crosshairs"></i> Make a Prediction</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="row" style="margin-top:{% if success %}8px{% else %}0{% endif %};">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header"><i class="fa fa-play-circle"></i> Select &amp; Train Algorithm</div>
+      <form method="POST" action="/modelperformance" id="trainForm">
+        <div class="form-group">
+          <label class="form-label">Choose Algorithm</label>
+          <select name="algorithm" class="form-control">
+            <option value="2" selected>Random Forest — Best Accuracy (98.71%)</option>
+            <option value="4">Bagging Classifier — 98.67%</option>
+            <option value="5">Gradient Boosting — 97.34%</option>
+            <option value="3">AdaBoost — 93.24%</option>
+            <option value="1">Logistic Regression — 86.09% (Baseline)</option>
+          </select>
+          <div class="form-hint">Random Forest is recommended — it achieves the best results on NSL-KDD</div>
+        </div>
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary" id="trainBtn">
+            <i class="fa fa-play"></i> Train &amp; Evaluate
+          </button>
+          <a href="/compare" class="btn btn-secondary">
+            <i class="fa fa-th-list"></i> Compare All Instead
+          </a>
+        </div>
+        <div class="spinner-wrap" id="spinner">
+          <i class="fa fa-spinner fa-spin"></i> Training model on your dataset, please wait...
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header"><i class="fa fa-info-circle"></i> Algorithm Descriptions</div>
+      <div style="font-size:13px;color:var(--gray-600);line-height:1.9;">
+        <p><strong style="color:var(--gray-900);">Random Forest</strong> — Builds 100 decision trees on random subsets of data and takes a majority vote. Reduces overfitting. Best performer.</p>
+        <p><strong style="color:var(--gray-900);">Bagging</strong> — Bootstrap aggregation. Similar to Random Forest but without feature randomisation.</p>
+        <p><strong style="color:var(--gray-900);">Gradient Boosting</strong> — Builds trees sequentially, each one fixing the errors of the previous.</p>
+        <p><strong style="color:var(--gray-900);">AdaBoost</strong> — Adaptive boosting. Focuses on misclassified samples each round.</p>
+        <p><strong style="color:var(--gray-900);">Logistic Regression</strong> — Simple linear model. Fast but weakest for non-linear traffic patterns.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('trainForm').addEventListener('submit', function() {
+  var spinner = document.getElementById('spinner');
+  var btn     = document.getElementById('trainBtn');
+  spinner.style.display = 'flex';
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Training...';
+});
+</script>
+{% endblock %}

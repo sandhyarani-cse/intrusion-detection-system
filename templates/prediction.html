@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}IDS — Predict{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1><i class="fa fa-crosshairs" style="color:var(--blue);margin-right:8px;"></i>Predict</h1>
+  <p>Step 6 of 5 — Click any record from the table below to classify it instantly</p>
+</div>
+
+{% if error %}
+<div class="alert alert-error"><i class="fa fa-exclamation-circle"></i> {{ error }}</div>
+{% endif %}
+
+{% if success %}
+<div class="pred-box {{ badge }}">
+  <span class="pred-icon">{% if badge == 'danger' %}⚠️{% else %}✅{% endif %}</span>
+  <div class="pred-title">{{ result }}</div>
+  {% if conf %}
+  <div class="pred-meta">Confidence: <strong>{{ conf }}%</strong> &nbsp;·&nbsp; Model: {{ alg }}</div>
+  <div class="conf-bar-track">
+    <div class="conf-bar-fill {{ badge }}" style="width:{{ conf }}%;"></div>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- Clickable sample records -->
+<div class="card">
+  <div class="card-header"><i class="fa fa-hand-pointer-o"></i> Click Any Row to Predict</div>
+  <div class="alert alert-info" style="margin-bottom:14px;">
+    <i class="fa fa-info-circle"></i>
+    <div>
+      <strong>How to use:</strong> Click any row in the table below.
+      The feature values will auto-fill into the form.
+      Then click <strong>Classify Record</strong>.
+      No typing required.
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="data-table" id="recordTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Duration</th>
+          <th>Protocol <small style="font-weight:400;">(0=TCP, 1=UDP, 2=ICMP)</small></th>
+          <th>Src Bytes</th>
+          <th>Dst Bytes</th>
+          <th>Count</th>
+          <th>Srv Count</th>
+          <th>Actual Label</th>
+        </tr>
+      </thead>
+      <tbody>
+        {# Each row: id, duration, protocol, src_bytes, dst_bytes, count, srv_count, label_text, label_class, full_38_features #}
+        {% set records = [
+          (1,  '0',  '0', '0',     '0',    '136', '1',  'Normal', 'success',
+           '2.0,12983.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,134.0,86.0,0.61,0.04,0.61,0.02,0.0,0.0,0.0,0.0'),
+          (2,  '0',  '1', '105',   '146',  '1',   '1',  'Normal', 'success',
+           '0.0,1.0,0.0,0.0,105.0,146.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,255.0,254.0,1.0,0.01,0.0,0.0,0.0,0.0,0.0,0.0'),
+          (3,  '2',  '1', '8749',  '0',    '1',   '1',  'Normal', 'success',
+           '2.0,1.0,0.0,0.0,8749.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,255.0,255.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0'),
+          (4,  '0',  '0', '0',     '0',    '1',   '65', 'Attack', 'danger',
+           '0.0,20.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,65.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,3.0,57.0,1.0,0.0,1.0,0.28,0.0,0.0,0.0,0.0'),
+          (5,  '0',  '0', '0',     '0',    '511', '1',  'Attack', 'danger',
+           '0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,511.0,1.0,1.0,0.0,1.0,1.0,0.0,0.0,0.0,255.0,1.0,0.0,0.06,0.0,0.0,1.0,1.0,0.0,0.0'),
+          (6,  '0',  '1', '232',   '8153', '1',   '1',  'Normal', 'success',
+           '0.0,1.0,0.0,0.0,232.0,8153.0,0.0,0.0,0.0,5.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,255.0,255.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0'),
+          (7,  '0',  '0', '0',     '0',    '3',   '3',  'Attack', 'danger',
+           '0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,3.0,3.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,255.0,100.0,0.39,0.0,0.39,0.18,0.0,0.0,0.0,0.0'),
+          (8,  '0',  '2', '0',     '146',  '2',   '2',  'Normal', 'success',
+           '0.0,2.0,0.0,0.0,0.0,146.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2.0,2.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,143.0,143.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0'),
+          (9,  '0',  '0', '0',     '0',    '1',   '97', 'Attack', 'danger',
+           '0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,97.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,2.0,60.0,1.0,0.0,1.0,0.5,0.0,0.0,0.0,0.0'),
+          (10, '0',  '1', '0',     '0',    '1',   '1',  'Normal', 'success',
+           '0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,255.0,255.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0'),
+        ] %}
+        {% for num, dur, proto, src, dst, cnt, srv, label, cls, feats in records %}
+        <tr class="clickable" data-features="{{ feats }}" onclick="selectRow(this)">
+          <td style="color:var(--gray-400);">{{ num }}</td>
+          <td>{{ dur }}</td>
+          <td>{{ proto }}</td>
+          <td>{{ src }}</td>
+          <td>{{ dst }}</td>
+          <td>{{ cnt }}</td>
+          <td>{{ srv }}</td>
+          <td><span class="badge badge-{% if cls == 'success' %}green{% else %}red{% endif %}">{{ label }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="form-hint" style="margin-top:8px;">
+    <i class="fa fa-info-circle"></i>
+    "Actual Label" shows what the record really is in the dataset.
+    After clicking Classify, you'll see what the <strong>model predicts</strong> — they should mostly match.
+    Mismatches show where the model makes mistakes.
+  </p>
+</div>
+
+<!-- Classification form -->
+<div class="card">
+  <div class="card-header"><i class="fa fa-bolt"></i> Classify Record</div>
+  <form method="POST" action="/prediction">
+    <div class="form-group">
+      <label class="form-label">
+        Feature Values
+        <span>— auto-filled when you click a row above, or paste 38 values manually</span>
+      </label>
+      <textarea
+        name="features"
+        id="featureInput"
+        class="form-control"
+        rows="3"
+        placeholder="Click any row in the table above to fill this automatically...">{% if features_input %}{{ features_input }}{% endif %}</textarea>
+      <div class="form-hint">Exactly 38 comma-separated numeric values required</div>
+    </div>
+    <div class="btn-group">
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="fa fa-bolt"></i> Classify Record
+      </button>
+      <button type="button" class="btn btn-secondary" onclick="clearForm()">
+        <i class="fa fa-times"></i> Clear
+      </button>
+    </div>
+  </form>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function selectRow(row) {
+  // Remove selection from all rows
+  document.querySelectorAll('#recordTable tbody tr').forEach(function(r) {
+    r.classList.remove('selected');
+  });
+  // Highlight clicked row
+  row.classList.add('selected');
+  // Fill textarea
+  var input = document.getElementById('featureInput');
+  input.value = row.getAttribute('data-features');
+  // Scroll to form smoothly
+  input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // Brief visual feedback on textarea
+  input.style.borderColor = 'var(--blue)';
+  setTimeout(function() { input.style.borderColor = ''; }, 1500);
+}
+
+function clearForm() {
+  document.getElementById('featureInput').value = '';
+  document.querySelectorAll('#recordTable tbody tr').forEach(function(r) {
+    r.classList.remove('selected');
+  });
+}
+
+// If the page reloaded with a result, highlight the matching row
+{% if features_input %}
+document.addEventListener('DOMContentLoaded', function() {
+  var input = '{{ features_input }}';
+  document.querySelectorAll('#recordTable tbody tr').forEach(function(r) {
+    if (r.getAttribute('data-features') === input) {
+      r.classList.add('selected');
+    }
+  });
+});
+{% endif %}
+</script>
+{% endblock %}

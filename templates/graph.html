@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}IDS — Accuracy Graph{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1><i class="fa fa-line-chart" style="color:var(--blue);margin-right:8px;"></i>Accuracy Graph</h1>
+  <p>Visual comparison of all 5 algorithm accuracies on your dataset</p>
+</div>
+
+{% if error %}
+<div class="alert alert-error">
+  <i class="fa fa-exclamation-circle"></i>
+  <div>{{ error }} &nbsp;
+    <a href="/upload"><strong>Upload →</strong></a> then
+    <a href="/traintest"><strong>Split →</strong></a> then return here.
+  </div>
+</div>
+{% endif %}
+
+{% if chart_img and not error %}
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header"><i class="fa fa-bar-chart"></i> Algorithm Accuracy Comparison</div>
+      <div class="chart-box">
+        <img src="data:image/png;base64,{{ chart_img }}" style="width:100%;" alt="Accuracy Chart">
+      </div>
+      <p class="form-hint" style="margin-top:10px;text-align:center;">
+        Computed on your dataset using 80/20 stratified train-test split
+      </p>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header"><i class="fa fa-trophy"></i> Accuracy Rankings</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Algorithm</th><th>Accuracy</th></tr></thead>
+          <tbody>
+            {% for name, score in results.items() | sort(attribute='1', reverse=True) %}
+            <tr {% if loop.first %}class="winner-row"{% endif %}>
+              <td><strong>{% if loop.first %}⭐ {% endif %}{{ name }}</strong></td>
+              <td class="{% if loop.first %}best{% endif %}">{{ score }}%</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><i class="fa fa-lightbulb-o"></i> Key Findings</div>
+      <div style="font-size:13px;color:var(--gray-600);line-height:1.8;">
+        <p><strong>Random Forest</strong> wins because it builds 100 trees on random data subsets and takes a majority vote — reducing overfitting.</p>
+        <p><strong>Logistic Regression</strong> scores lowest because it assumes a linear boundary between normal and attack traffic, which doesn't match real network patterns.</p>
+      </div>
+      <div class="btn-group" style="margin-top:12px;">
+        <a href="/compare" class="btn btn-primary btn-sm"><i class="fa fa-th-list"></i> Full Compare</a>
+        <a href="/prediction" class="btn btn-secondary btn-sm"><i class="fa fa-crosshairs"></i> Predict</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

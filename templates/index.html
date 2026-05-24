@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}IDS System — Home{% endblock %}
+{% block content %}
+
+<!-- Hero -->
+<div class="hero text-center" style="margin:-32px -24px 36px;">
+  <div class="page-wrap" style="padding-bottom:0;">
+    <div class="hero-label"><i class="fa fa-file-text-o"></i> IJSREM Published — May 2024</div>
+    <h1>Cloud-Based Intrusion Detection<br>System Using Machine Learning</h1>
+    <p>
+      Detects network intrusions in real time using the NSL-KDD benchmark dataset.
+      Classifies traffic as <strong>Normal</strong> or <strong>Attack</strong> with
+      <strong>98.71% accuracy</strong> using Random Forest.
+    </p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="/upload" class="btn btn-lg" style="background:white;color:var(--blue);font-weight:700;">
+        <i class="fa fa-play"></i> Start Analysis
+      </a>
+      <a href="/compare" class="btn btn-lg" style="background:rgba(255,255,255,.15);color:white;border:1.5px solid rgba(255,255,255,.4);font-weight:600;">
+        <i class="fa fa-bar-chart"></i> View Results
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-row">
+  <div class="stat blue"><div class="stat-label">Best Accuracy</div><div class="stat-value">98.71%</div></div>
+  <div class="stat green"><div class="stat-label">Algorithms Compared</div><div class="stat-value">5</div></div>
+  <div class="stat orange"><div class="stat-label">Dataset Records</div><div class="stat-value">22,542</div></div>
+  <div class="stat red"><div class="stat-label">Attack Categories</div><div class="stat-value">4</div></div>
+</div>
+
+<!-- How to use -->
+<div class="card">
+  <div class="card-header"><i class="fa fa-map-signs"></i> How to Use This System</div>
+  <div class="row">
+    <div class="col-md-6">
+      {% for title, desc in [
+        ('Upload Dataset',   'Go to Data → Upload and upload the file dataset/KDDTest1.csv'),
+        ('View Dataset',     'Check the data preview and see the Normal vs Attack class split'),
+        ('Split the Data',   'Go to Data → Split — choose 20% test and click Split Dataset'),
+        ('Compare Results',  'Go to Analysis → Compare All to see all 5 algorithms at once'),
+        ('Make a Prediction','Go to Predict — click any row in the table to classify it instantly')
+      ] %}
+      <div class="how-step">
+        <div class="how-num">{{ loop.index }}</div>
+        <div>
+          <div class="how-title">{{ title }}</div>
+          <div class="how-desc">{{ desc }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="col-md-6">
+      <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:20px;height:100%;">
+        <div style="font-size:13px;font-weight:700;color:var(--gray-900);margin-bottom:14px;">
+          <i class="fa fa-info-circle" style="color:var(--blue);margin-right:6px;"></i>
+          About the Dataset
+        </div>
+        <div style="font-size:13px;color:var(--gray-600);line-height:1.8;">
+          <p><strong>NSL-KDD</strong> is the standard benchmark dataset for network intrusion detection research. It contains 38 features per connection record.</p>
+          <p><strong>Label 0</strong> = Normal Traffic &nbsp;·&nbsp; <strong>Label 1</strong> = Attack</p>
+          <p>Four attack types are present: <strong>DoS</strong> (Denial of Service), <strong>Probe</strong> (scanning), <strong>R2L</strong> (remote to local), and <strong>U2R</strong> (privilege escalation).</p>
+        </div>
+        <a href="/upload" class="btn btn-primary" style="margin-top:14px;">
+          <i class="fa fa-upload"></i> Get Started Now
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Features -->
+<div class="card-header" style="margin-bottom:14px;border-bottom:none;">
+  <i class="fa fa-cubes"></i> System Features
+</div>
+<div class="features-grid">
+  {% for icon, title, desc in [
+    ('fa-upload',    'Upload Dataset',    'Load any NSL-KDD compatible CSV file. No header row required.'),
+    ('fa-table',     'View & Explore',    'Preview the first 10 records and see Normal vs Attack distribution.'),
+    ('fa-random',    'Train/Test Split',  'Divide data into training and testing sets with stratified sampling.'),
+    ('fa-cogs',      'Train One Model',   'Select any of 5 ML algorithms and view Accuracy, Precision, Recall, F1.'),
+    ('fa-th-list',   'Compare All 5',     'Run all algorithms at once and compare every metric side by side.'),
+    ('fa-crosshairs','Click to Predict',  'Click any record from a table and classify it instantly — no typing.')
+  ] %}
+  <div class="feat-card">
+    <div class="feat-icon"><i class="fa {{ icon }}"></i></div>
+    <div class="feat-title">{{ title }}</div>
+    <p class="feat-desc">{{ desc }}</p>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Algorithm results -->
+<div class="card">
+  <div class="card-header"><i class="fa fa-trophy"></i> Algorithm Accuracy Results</div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Rank</th><th>Algorithm</th><th>Accuracy</th><th>Type</th><th></th></tr></thead>
+      <tbody>
+        {% for rank, name, acc, typ in [
+          (1,'Random Forest','98.71%','Ensemble — Bagging'),
+          (2,'Bagging','98.67%','Ensemble — Bagging'),
+          (3,'Gradient Boosting','97.34%','Ensemble — Boosting'),
+          (4,'AdaBoost','93.24%','Ensemble — Boosting'),
+          (5,'Logistic Regression','86.09%','Linear')
+        ] %}
+        <tr {% if rank==1 %}class="winner-row"{% endif %}>
+          <td style="color:var(--gray-400);font-weight:600;">{{ rank }}</td>
+          <td><strong>{{ name }}</strong></td>
+          <td class="{% if rank==1 %}best{% endif %}"><strong>{{ acc }}</strong></td>
+          <td style="color:var(--gray-500);">{{ typ }}</td>
+          <td>
+            {% if rank==1 %}<span class="badge badge-green">Best</span>
+            {% elif rank==5 %}<span class="badge badge-gray">Baseline</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:12px;color:var(--gray-500);margin-top:10px;">
+    Results are computed live from your uploaded dataset. The table above shows reference values from the full NSL-KDD training set.
+  </p>
+</div>
+
+{% endblock %}

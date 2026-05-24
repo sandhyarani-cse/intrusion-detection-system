@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}IDS — Upload Dataset{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1><i class="fa fa-upload" style="color:var(--blue);margin-right:8px;"></i>Upload Dataset</h1>
+  <p>Step 1 of 5 — Upload your NSL-KDD CSV file to begin analysis</p>
+</div>
+
+{% if success %}
+<div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}</div>
+{% endif %}
+{% if error %}
+<div class="alert alert-error"><i class="fa fa-exclamation-circle"></i> {{ error }}</div>
+{% endif %}
+
+<div class="row">
+  <div class="col-md-7">
+
+    <!-- Upload form -->
+    <div class="card">
+      <div class="card-header"><i class="fa fa-cloud-upload"></i> Select CSV File</div>
+      <form method="POST" action="/upload" enctype="multipart/form-data">
+        <div class="drop-zone" id="dz">
+          <span class="dz-icon fa fa-cloud-upload"></span>
+          <div class="dz-title">Click to browse or drag &amp; drop your CSV file here</div>
+          <div class="dz-sub" id="dzSub">Accepted format: .csv &nbsp;·&nbsp; Maximum size: 50 MB</div>
+          <input type="file" name="csvfile" accept=".csv" onchange="onFileSelected(this)">
+        </div>
+        <div style="margin-top:16px;">
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i class="fa fa-upload"></i> Upload Dataset
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Quick start tip -->
+    <div class="alert alert-info">
+      <i class="fa fa-lightbulb-o"></i>
+      <div>
+        <strong>Quick Start:</strong> The project already includes
+        <code>dataset/KDDTest1.csv</code> (22,542 records).
+        Upload that file to get started immediately without downloading anything.
+      </div>
+    </div>
+
+    {% if success %}
+    <div class="next-banner">
+      <div class="next-banner-text">
+        <p><i class="fa fa-arrow-right"></i> File uploaded — next step: view your dataset</p>
+        <p class="sub">Check the first 10 records and see the Normal vs Attack distribution</p>
+      </div>
+      <a href="/view" class="btn btn-primary"><i class="fa fa-table"></i> View Dataset</a>
+    </div>
+    {% endif %}
+
+  </div>
+
+  <div class="col-md-5">
+
+    <!-- Expected format -->
+    <div class="card">
+      <div class="card-header"><i class="fa fa-info-circle"></i> Expected File Format</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Column</th><th>Feature</th><th>Type</th></tr></thead>
+          <tbody>
+            {% for col,name,typ in [
+              ('1','duration','integer'),('2','protocol_type','string'),
+              ('3','service','string'),('4','flag','string'),
+              ('5–38','network features','float'),('39','label (0 or 1)','integer')
+            ] %}
+            <tr>
+              <td><code>{{ col }}</code></td>
+              <td>{{ name }}</td>
+              <td><span class="badge badge-blue">{{ typ }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="form-hint" style="margin-top:10px;">
+        <i class="fa fa-check-circle" style="color:var(--green);"></i>
+        No header row required — column names are assigned automatically.<br>
+        <i class="fa fa-check-circle" style="color:var(--green);"></i>
+        Label 0 = Normal Traffic &nbsp;·&nbsp; Label 1 = Attack
+      </p>
+    </div>
+
+    <!-- What happens next -->
+    <div class="card">
+      <div class="card-header"><i class="fa fa-map-o"></i> What Happens Next</div>
+      {% for t, d in [
+        ('View Dataset','Preview records and check class distribution'),
+        ('Split Data','Divide into 80% training / 20% testing'),
+        ('Compare All','All 5 algorithms run and compared automatically'),
+        ('Predict','Click any record to classify it instantly')
+      ] %}
+      <div class="how-step">
+        <div class="how-num" style="background:var(--gray-300);color:var(--gray-700);font-size:10px;">{{ loop.index + 1 }}</div>
+        <div>
+          <div class="how-title">{{ t }}</div>
+          <div class="how-desc">{{ d }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+function onFileSelected(input) {
+  if (input.files && input.files[0]) {
+    var f = input.files[0];
+    document.getElementById('dzSub').textContent =
+      'Selected: ' + f.name + ' (' + (f.size/1024).toFixed(1) + ' KB)';
+    document.getElementById('dz').style.borderColor = 'var(--blue)';
+    document.getElementById('dz').style.background  = 'var(--blue-light)';
+  }
+}
+</script>
+{% endblock %}

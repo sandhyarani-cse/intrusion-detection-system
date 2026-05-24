@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}IDS — View Dataset{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1><i class="fa fa-table" style="color:var(--blue);margin-right:8px;"></i>View Dataset</h1>
+  <p>Step 2 of 5 — Inspect your data before training</p>
+</div>
+
+{% if error %}
+<div class="alert alert-error">
+  <i class="fa fa-exclamation-circle"></i>
+  <div>{{ error }} &nbsp;<a href="/upload"><strong>Upload a dataset →</strong></a></div>
+</div>
+{% endif %}
+
+{% if stats %}
+<div class="stats-row">
+  <div class="stat"><div class="stat-label">Total Records</div><div class="stat-value">{{ stats.rows }}</div></div>
+  <div class="stat"><div class="stat-label">Features per Record</div><div class="stat-value">{{ stats.cols - 1 }}</div></div>
+  <div class="stat green"><div class="stat-label">Normal Traffic</div><div class="stat-value">{{ stats.normal }}</div></div>
+  <div class="stat red"><div class="stat-label">Attack Traffic</div><div class="stat-value">{{ stats.attack }}</div></div>
+</div>
+{% endif %}
+
+{% if table %}
+<div class="card">
+  <div class="card-header"><i class="fa fa-eye"></i> First 10 Records</div>
+  <div class="table-wrap">{{ table | safe }}</div>
+  <p class="form-hint" style="margin-top:10px;">
+    <i class="fa fa-info-circle"></i>
+    Showing the first 10 rows of your dataset.
+    Label column: <strong>0 = Normal Traffic</strong>, <strong>1 = Attack Traffic</strong>
+  </p>
+</div>
+
+<div class="next-banner">
+  <div class="next-banner-text">
+    <p><i class="fa fa-arrow-right"></i> Dataset looks good — next step: split into training and testing sets</p>
+    <p class="sub">The model will learn from the training set and be evaluated on the test set</p>
+  </div>
+  <a href="/traintest" class="btn btn-primary"><i class="fa fa-random"></i> Split Dataset</a>
+</div>
+{% endif %}
+
+{% endblock %}

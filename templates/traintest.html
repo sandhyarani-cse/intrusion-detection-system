@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}IDS — Split Dataset{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1><i class="fa fa-random" style="color:var(--blue);margin-right:8px;"></i>Train / Test Split</h1>
+  <p>Step 3 of 5 — Divide the dataset so the model can be trained and evaluated fairly</p>
+</div>
+
+{% if error %}
+<div class="alert alert-error">
+  <i class="fa fa-exclamation-circle"></i>
+  <div>{{ error }} &nbsp;<a href="/upload"><strong>Upload a dataset →</strong></a></div>
+</div>
+{% endif %}
+
+{% if success %}
+<div class="alert alert-success">
+  <i class="fa fa-check-circle"></i>
+  Split complete — <strong>{{ train_n }}</strong> records for training and
+  <strong>{{ test_n }}</strong> records for testing ({{ test_ratio }}% test set)
+</div>
+
+<div class="stats-row" style="grid-template-columns:1fr 1fr;max-width:420px;">
+  <div class="stat green"><div class="stat-label">Training Records</div><div class="stat-value">{{ train_n }}</div></div>
+  <div class="stat blue"><div class="stat-label">Testing Records</div><div class="stat-value">{{ test_n }}</div></div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header" style="color:var(--green);"><i class="fa fa-database"></i> Training Set — First 5 Rows</div>
+      <div class="table-wrap" style="font-size:12px;">{{ train_preview | safe }}</div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header" style="color:var(--blue);"><i class="fa fa-database"></i> Testing Set — First 5 Rows</div>
+      <div class="table-wrap" style="font-size:12px;">{{ test_preview | safe }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="next-banner">
+  <div class="next-banner-text">
+    <p><i class="fa fa-arrow-right"></i> Data split — now train and compare ML algorithms</p>
+    <p class="sub">We recommend Compare All Algorithms for a complete side-by-side view</p>
+  </div>
+  <div class="btn-group">
+    <a href="/compare" class="btn btn-primary"><i class="fa fa-th-list"></i> Compare All</a>
+    <a href="/modelperformance" class="btn btn-secondary"><i class="fa fa-cogs"></i> Train One Model</a>
+  </div>
+</div>
+{% endif %}
+
+<div class="row" style="margin-top:{% if success %}24px{% else %}0{% endif %};">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header"><i class="fa fa-sliders"></i> Configure Split Ratio</div>
+      <form method="POST" action="/traintest">
+        <div class="form-group">
+          <label class="form-label">
+            Test Set Size
+            <span>(the rest goes to training)</span>
+          </label>
+          <select name="test_size" class="form-control">
+            <option value="0.1">10% test / 90% train</option>
+            <option value="0.2" selected>20% test / 80% train &nbsp;— Recommended</option>
+            <option value="0.3">30% test / 70% train</option>
+            <option value="0.4">40% test / 60% train</option>
+          </select>
+          <div class="form-hint">
+            A stratified split is used — both training and testing sets will have the same Normal/Attack ratio as the original dataset
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fa fa-cut"></i> Split Dataset</button>
+      </form>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header"><i class="fa fa-question-circle"></i> Why Do We Split the Data?</div>
+      <div style="font-size:13px;color:var(--gray-600);line-height:1.8;">
+        <p>If we train and test on the same data, the model just memorises the answers — like giving a student the exam paper in advance. The accuracy would be falsely high.</p>
+        <p>By keeping a separate <strong>test set</strong> that the model has never seen, we get a realistic accuracy score.</p>
+        <div class="alert alert-warning" style="margin-top:10px;">
+          <i class="fa fa-exclamation-triangle"></i>
+          <strong>Note:</strong> The original project scored accuracy on the training set and reported 99.16%. The correct test-set accuracy is <strong>98.71%</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
